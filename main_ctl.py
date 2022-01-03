@@ -50,6 +50,10 @@ class MainCtl():
         self.info6_btn_cvt_laplacian = self.view.info6.btn_cvt_laplacian
         self.info6_btn_cvt_cannyedge = self.view.info6.btn_cvt_cannyedge
 
+        self.info7_ledit3btn3_cvt_morph = self.view.info7.ledit3btn3_cvt_morph
+        self.info7_ledit8btn1_hsva_mask = self.view.info7.ledit8btn1_hsva_mask
+        self.info7_ledit8btn1_rgba_mask = self.view.info7.ledit8btn1_rgba_mask
+
         self.connect_signals()
 
 
@@ -75,6 +79,12 @@ class MainCtl():
         self.info6_btn_cvt_otsu.clicked.connect(self.cb_info6_btn_cvt_otsu)
         self.info6_btn_cvt_laplacian.clicked.connect(self.cb_info6_btn_cvt_laplacian)
         self.info6_btn_cvt_cannyedge.clicked.connect(self.cb_info6_btn_cvt_cannyedge)
+
+        self.info7_ledit3btn3_cvt_morph.btn1.clicked.connect(self.cb_info7_ledit3btn3_cvt_morph_btn1)
+        self.info7_ledit3btn3_cvt_morph.btn2.clicked.connect(self.cb_info7_ledit3btn3_cvt_morph_btn2)
+        self.info7_ledit3btn3_cvt_morph.btn3.clicked.connect(self.cb_info7_ledit3btn3_cvt_morph_btn3)
+        self.info7_ledit8btn1_hsva_mask.btn1.clicked.connect(self.cb_info7_ledit8btn1_hsva_mask)
+        self.info7_ledit8btn1_rgba_mask.btn1.clicked.connect(self.cb_info7_ledit8btn1_rgba_mask)
 
     def init_converted_img_list(self,npimg):
         try:
@@ -179,6 +189,7 @@ class MainCtl():
         self.dict_rois = self.model_img.start_capture(self.npimg_original)
         if self.dict_rois == 0:
             self.dict_rois = {}
+            self.info2_cbox_roi_items.clear()
             return
         self.set_dict_rois()
 
@@ -191,19 +202,26 @@ class MainCtl():
             i += 1
 
     def cb_info2_cbox_roi_items_selected(self,index):
-        self.dict_rois_item_index = index
-        axis = self.dict_rois['axis'][index]
-        self.info2_ledit_roi_axis.setText(f'{axis}')
-        
-        self.npimg_lbl = self.dict_rois['cropped_npimgs'][index]
-        self.init_converted_img_list(self.npimg_lbl)
-    
+        try:
+            self.dict_rois_item_index = index
+            if self.dict_rois == {}:
+                return
+            axis = self.dict_rois['axis'][index]
+            self.info2_ledit_roi_axis.setText(f'{axis}')
+            
+            self.npimg_lbl = self.dict_rois['cropped_npimgs'][index]
+            self.init_converted_img_list(self.npimg_lbl)
+
+        except Exception as e:
+            QMessageBox.information(None, "QMessageBox", f"from info2_cbox_roi_items_selected : {e}")
+            return
+            
     def cb_info2_btn_change_roi_axis(self):
         try:
             ###### check if the axis available ############
             axis = self.info2_ledit_roi_axis.text()
             if not axis :
-                QMessageBox.information(None, "QMessageBox", "wrong rect")
+                QMessageBox.information(None, "QMessageBox", "from info2_btn_change_roi_axis : wrong rect")
                 return
             ###### turn text axis to axis ###########
             axis = re.sub('[)( ]',"",axis)
@@ -212,7 +230,7 @@ class MainCtl():
             x1=int(x1); y1=int(y1); x2=int(x2); y2=int(y2)
 
             if x1 >= x2 or y1 >= y2 :
-                QMessageBox.information(None, "QMessageBox", "wrong rect")
+                QMessageBox.information(None, "QMessageBox", "from info2_btn_change_roi_axis : wrong rect")
                 return
             rect = (x1,y1,x2,y2)
 
@@ -223,8 +241,8 @@ class MainCtl():
             self.set_dict_rois()
             self.cb_info2_cbox_roi_items_selected(index)
 
-        except:
-            QMessageBox.information(None, "QMessageBox", "change except")
+        except Exception as e:
+            QMessageBox.information(None, "QMessageBox", f"from info2_btn_change_roi_axis : {e}")
             return
             
     def cb_info4_btn_prev_converted_img(self):
@@ -334,3 +352,125 @@ class MainCtl():
             QMessageBox.information(None,"QMessageBox",f'from info6_btn_cvt_cannyedge : {e}')
 
 
+    def cb_info7_ledit3btn3_cvt_morph_btn1(self):
+        try:
+            kn_x = self.info7_ledit3btn3_cvt_morph.ledit1.text()
+            kn_y = self.info7_ledit3btn3_cvt_morph.ledit2.text()
+            iters = self.info7_ledit3btn3_cvt_morph.ledit3.text()
+
+            if not kn_x or not kn_x.isdigit() or not kn_y or not kn_y.isdigit() or not iters or not iters.isdigit():
+                QMessageBox.information(None,"QMessageBox", "from info7_ledit3btn3_cvt_morph_btn1 : parameter not correct!")
+                return
+            
+            kn_x = int(kn_x); kn_y = int(kn_y); iters = int(iters)
+
+            npimg = self.list_converted_imgs[self.index_converted_imgs]
+            if np.ndim(npimg) != 2:
+                QMessageBox.information(None,"QMessageBox", "from info7_ledit3btn3_cvt_morph_btn1 : the image shoud be single channel")
+                return
+            kernel = np.ones((kn_y,kn_x), np.uint8)
+            npimg = cv2.erode(npimg,kernel=kernel,iterations=iters)
+            self.add_converted_img_list(npimg)
+        except Exception as e :
+            QMessageBox.information(None,"QMessageBox",f'from info7_ledit3btn3_cvt_morph_btn1 : {e}')
+
+    def cb_info7_ledit3btn3_cvt_morph_btn2(self):
+        try:
+            kn_x = self.info7_ledit3btn3_cvt_morph.ledit1.text()
+            kn_y = self.info7_ledit3btn3_cvt_morph.ledit2.text()
+            iters = self.info7_ledit3btn3_cvt_morph.ledit3.text()
+
+            if not kn_x or not kn_x.isdigit() or not kn_y or not kn_y.isdigit() or not iters or not iters.isdigit():
+                QMessageBox.information(None,"QMessageBox", "from info7_ledit3btn3_cvt_morph_btn2 : parameter not correct!")
+                return
+            
+            kn_x = int(kn_x); kn_y = int(kn_y); iters = int(iters)
+
+            npimg = self.list_converted_imgs[self.index_converted_imgs]
+            if np.ndim(npimg) != 2:
+                QMessageBox.information(None,"QMessageBox", "from info7_ledit3btn3_cvt_morph_btn2 : the image shoud be single channel")
+                return
+            kernel = np.ones((kn_y,kn_x), np.uint8)
+            npimg = cv2.dilate(npimg,kernel=kernel,iterations=iters)
+            self.add_converted_img_list(npimg)
+        except Exception as e :
+            QMessageBox.information(None,"QMessageBox",f'from info7_ledit3btn3_cvt_morph_btn2 : {e}')
+
+
+    def cb_info7_ledit3btn3_cvt_morph_btn3(self):
+        try:
+            kn_x = self.info7_ledit3btn3_cvt_morph.ledit1.text()
+            kn_y = self.info7_ledit3btn3_cvt_morph.ledit2.text()
+            iters = self.info7_ledit3btn3_cvt_morph.ledit3.text()
+
+            if not kn_x or not kn_x.isdigit() or not kn_y or not kn_y.isdigit() or not iters or not iters.isdigit():
+                QMessageBox.information(None,"QMessageBox", "from info7_ledit3btn3_cvt_morph_btn3 : parameter not correct!")
+                return
+            
+            kn_x = int(kn_x); kn_y = int(kn_y); iters = int(iters)
+
+            npimg = self.list_converted_imgs[self.index_converted_imgs]
+            if np.ndim(npimg) != 2:
+                QMessageBox.information(None,"QMessageBox", "from info7_ledit3btn3_cvt_morph_btn3 : the image shoud be single channel")
+                return
+            kernel = np.ones((kn_y,kn_x), np.uint8)
+            npimg = cv2.morphologyEx(npimg,cv2.MORPH_GRADIENT,kernel)
+            self.add_converted_img_list(npimg)
+        except Exception as e :
+            QMessageBox.information(None,"QMessageBox",f'from info7_ledit3btn3_cvt_morph_btn3 : {e}')
+
+    def cb_info7_ledit8btn1_hsva_mask(self):
+        try:
+            h1 = self.info7_ledit8btn1_hsva_mask.ledit1.text()
+            s1 = self.info7_ledit8btn1_hsva_mask.ledit2.text()
+            v1 = self.info7_ledit8btn1_hsva_mask.ledit3.text()
+            a1 = self.info7_ledit8btn1_hsva_mask.ledit4.text()
+            h2 = self.info7_ledit8btn1_hsva_mask.ledit5.text()
+            s2 = self.info7_ledit8btn1_hsva_mask.ledit6.text()
+            v2 = self.info7_ledit8btn1_hsva_mask.ledit7.text()
+            a2 = self.info7_ledit8btn1_hsva_mask.ledit8.text()
+
+            if not h1 or not h1.isdigit() or not s1 or not s1.isdigit() or not v1 or not v1.isdigit() or not a1 or not a1.isdigit():
+                QMessageBox.information(None, "QMessageBox", "from info7_ledit8btn1_hsva_mask : value is not digit")
+                return
+
+            if not h2 or not h2.isdigit() or not s2 or not s2.isdigit() or not v2 or not v2.isdigit() or not a2 or not a2.isdigit():
+                QMessageBox.information(None, "QMessageBox", "from info7_ledit8btn1_hsva_mask : value is not digit")
+                return
+
+            h1=int(h1); s1=int(s1); v1=int(v1); a1=int(a1)
+            h2=int(h2); s2=int(s2); v2=int(v2); a2=int(a2)
+
+            npimg = self.list_converted_imgs[self.index_converted_imgs]
+            npimg = self.model_img.get_hsva_mask(npimg, h1, s1, v1, a1, h2, s2, v2, a2)
+            self.add_converted_img_list(npimg)
+        except Exception as e :
+            QMessageBox.information(None,"QMessageBox",f'from info7_ledit8btn1_hsva_mask : {e}')
+
+    def cb_info7_ledit8btn1_rgba_mask(self):
+        try:
+            r1 = self.info7_ledit8btn1_rgba_mask.ledit1.text()
+            g1 = self.info7_ledit8btn1_rgba_mask.ledit2.text()
+            b1 = self.info7_ledit8btn1_rgba_mask.ledit3.text()
+            a1 = self.info7_ledit8btn1_rgba_mask.ledit4.text()
+            r2 = self.info7_ledit8btn1_rgba_mask.ledit5.text()
+            g2 = self.info7_ledit8btn1_rgba_mask.ledit6.text()
+            b2 = self.info7_ledit8btn1_rgba_mask.ledit7.text()
+            a2 = self.info7_ledit8btn1_rgba_mask.ledit8.text()
+            
+            if not b1 or not b1.isdigit() or not g1 or not g1.isdigit() or not r1 or not r1.isdigit() or not a1 or not a1.isdigit():
+                QMessageBox.information(None, "QMessageBox", "from info7_ledit8btn1_rgba_mask : value is not digit")
+                return
+
+            if not b2 or not b2.isdigit() or not g2 or not g2.isdigit() or not r2 or not r2.isdigit() or not a2 or not a2.isdigit():
+                QMessageBox.information(None, "QMessageBox", "from info7_ledit8btn1_rgba_mask : value is not digit")
+                return
+
+            b1=int(b1); g1=int(g1); r1=int(r1); a1=int(a1)
+            b2=int(b2); g2=int(g2); r2=int(r2); a2=int(a2)
+
+            npimg = self.list_converted_imgs[self.index_converted_imgs]
+            npimg = self.model_img.get_rgba_mask(npimg,b1,g1,r1,a1,b2,g2,r2,a2)
+            self.add_converted_img_list(npimg)
+        except Exception as e :
+            QMessageBox.information(None,"QMessageBox",f'from info7_ledit8btn1_rgba_mask : {e}')
