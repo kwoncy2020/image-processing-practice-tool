@@ -54,6 +54,8 @@ class MainCtl():
         self.info7_ledit8btn1_hsva_mask = self.view.info7.ledit8btn1_hsva_mask
         self.info7_ledit8btn1_rgba_mask = self.view.info7.ledit8btn1_rgba_mask
 
+        self.info8_rbtn3btn1_tesseract = self.view.info8.rbtn3btn1_tesseract
+
         self.connect_signals()
 
 
@@ -85,6 +87,8 @@ class MainCtl():
         self.info7_ledit3btn3_cvt_morph.btn3.clicked.connect(self.cb_info7_ledit3btn3_cvt_morph_btn3)
         self.info7_ledit8btn1_hsva_mask.btn1.clicked.connect(self.cb_info7_ledit8btn1_hsva_mask)
         self.info7_ledit8btn1_rgba_mask.btn1.clicked.connect(self.cb_info7_ledit8btn1_rgba_mask)
+
+        self.info8_rbtn3btn1_tesseract.btn1.clicked.connect(self.cb_info8_rbtn3btn1_tesseract)
 
     def init_converted_img_list(self,npimg):
         try:
@@ -474,3 +478,31 @@ class MainCtl():
             self.add_converted_img_list(npimg)
         except Exception as e :
             QMessageBox.information(None,"QMessageBox",f'from info7_ledit8btn1_rgba_mask : {e}')
+
+    def cb_info8_rbtn3btn1_tesseract(self):
+        npimg = self.list_converted_imgs[self.index_converted_imgs]
+        
+        try:      ###### check if npimg processed ##########
+            if str(type(npimg)) !="<class 'numpy.ndarray'>" :
+                QMessageBox.information(None, "QMessageBox", "from info8_btn_tesseract : npimg not founded")
+                return
+            lang = ""
+            if self.info8_rbtn3btn1_tesseract.radio1.isChecked():
+                lang = lang + f'+{self.info8_rbtn3btn1_tesseract.radio1.text()}'
+            if self.info8_rbtn3btn1_tesseract.radio2.isChecked():
+                lang = lang + f'+{self.info8_rbtn3btn1_tesseract.radio2.text()}'
+            if self.info8_rbtn3btn1_tesseract.radio3.isChecked():
+                lang = lang + f'+{self.info8_rbtn3btn1_tesseract.radio3.text()}'
+            if lang == '':
+                QMessageBox.information(None, "QMessageBox", "from info8_rbtn3btn1_tesseract : language required")
+                return
+            lang = re.sub('^[+]','',lang)
+            text = self.model_img.get_text_tesseract(npimg,lang)
+            QMessageBox.information(None, "Tesseract", text)
+        except Exception as e :
+            QMessageBox.information(None, "QMessageBox", f"from info8_rbtn3btn1_tesseract : {e}")
+        
+        
+            
+
+        

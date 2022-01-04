@@ -21,6 +21,7 @@ class MainGui(QWidget):
         self.info5 = Info5()
         self.info6 = Info6()
         self.info7 = Info7()
+        self.info8 = Info8()
 
         self.vlayout.addWidget(self.info1)
         self.vlayout.addWidget(self.info2)
@@ -29,6 +30,7 @@ class MainGui(QWidget):
         self.vlayout.addWidget(self.info5)
         self.vlayout.addWidget(self.info6)
         self.vlayout.addWidget(self.info7)
+        self.vlayout.addWidget(self.info8)
 
         self.setLayout(self.vlayout)
 
@@ -289,6 +291,40 @@ class Info7(QWidget):
         self.setLayout(self.hlayout)
 
 
+class Info8(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+
+    def init_ui(self):
+        self.hlayout = QHBoxLayout()
+
+        self.rbtn3btn1_tesseract = Rbtn3btn1()
+        self.rbtn3btn1_tesseract.radio1.setText('eng')
+        self.rbtn3btn1_tesseract.radio1.setAutoExclusive(False)
+        self.rbtn3btn1_tesseract.radio2.setText('kor')
+        self.rbtn3btn1_tesseract.radio2.setAutoExclusive(False)
+        self.rbtn3btn1_tesseract.radio3.setText('jpn')
+        self.rbtn3btn1_tesseract.radio3.setAutoExclusive(False)
+        self.rbtn3btn1_tesseract.btn1.setText('tesseract')
+
+        self.hlayout.addWidget(self.rbtn3btn1_tesseract)
+
+        self.vlayout1 = QVBoxLayout() 
+        self.vlayout1.addWidget(self.rbtn3btn1_tesseract) 
+         
+         
+        self.frame1 = QFrame()
+        self.frame1.setFrameShape(QFrame.Panel | QFrame.Sunken)
+        self.frame1.setLayout(self.vlayout1)
+
+        
+        
+
+        self.hlayout.addWidget(self.frame1)
+
+        self.setLayout(self.hlayout)
+
 
 class Ledit1btn1(QWidget):
     def __init__(self):
@@ -326,8 +362,8 @@ class Ledit2btn1(QWidget):
 
 
 class LEdit3Btn3(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
         self.init_ui()
 
     def init_ui(self):
@@ -355,9 +391,31 @@ class LEdit3Btn3(QWidget):
 
         self.setLayout(self.vlayout)
 
+class Rbtn3btn1(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+
+    def init_ui(self):
+        self.vlayout = QVBoxLayout()
+        self.hlayout = QHBoxLayout()
+        self.radio1 = QRadioButton()
+        self.radio2 = QRadioButton()
+        self.radio3 = QRadioButton()
+
+        self.hlayout.addWidget(self.radio1)
+        self.hlayout.addWidget(self.radio2)
+        self.hlayout.addWidget(self.radio3)
+        
+        self.vlayout.addLayout(self.hlayout)
+        self.btn1 = QPushButton()
+        self.vlayout.addWidget(self.btn1)
+
+        self.setLayout(self.vlayout)
+
 class LEdit8Btn1(QWidget):
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self):
+        super().__init__()
         self.init_ui()
 
     def init_ui(self):
